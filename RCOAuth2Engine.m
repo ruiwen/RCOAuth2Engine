@@ -174,6 +174,8 @@
 		// Store them in the Keychain
 		[self storeOAuthTokenInKeychain];
 		
+		// Set the headers
+
 		// Complete the callback from earlier
 		if (_oAuthCompletionBlock) {
 			NSLog(@"Sending..");
@@ -210,6 +212,18 @@
 	[self removeOAuthTokenFromKeychain];
 }
 
+- (void)prepareHeaders:(MKNetworkOperation *)operation {
+	[super prepareHeaders:operation];
+	
+	// Add more headers
+	// Authorization: OAuth2 access_token=adfadfad
+	if([_tokens objectForKey:@"access_token"]) { 
+		NSString *authHeader = [NSString stringWithFormat:@"access_token=%@", [_tokens objectForKey:@"access_token"]];
+		[operation setAuthorizationHeaderValue:authHeader forAuthType:@"OAuth2"];
+	}
+
+}
+	 
 #pragma mark - OAuth Access Token store/retrieve, borrowed from https://github.com/rsieiro/RSOAuthEngine
 
 - (void)removeOAuthTokenFromKeychain
