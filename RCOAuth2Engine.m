@@ -75,10 +75,7 @@
 	if (self) {
 
 		NSLog(@"Begin init setup");
-		
-		_keychainWrapper = [[KeychainItemWrapper alloc] initWithIdentifier:@"RememberApp" accessGroup:nil];
 		_tokens = [[NSMutableDictionary alloc] init];
-		
 
 		[self setClientId:clientId];
 		[self setClientSecret:clientSecret];
@@ -90,11 +87,6 @@
 		
 		// Retrieve tokens from Keychain if possible
 		NSLog(@"Retrieving");
-//		NSMutableDictionary *t = [_keychainWrapper objectForKey:(__bridge id)kSecAttrAccount];
-//		if(t && [t isKindOfClass:[NSDictionary class]]) {
-//			NSLog(@"Haz token: %@", t);
-//			_tokens = t;
-//		}
 		[self retrieveOAuthTokenFromKeychain];
 		
 		NSLog(@"Init tokens: %@", _tokens);
@@ -171,10 +163,8 @@
 		NSLog(@"Step Two complete");
 		
 		// Process the data
-		NSLog(@"Data: %@", [completedOperation responseJSON]);
 		NSDictionary *data =[completedOperation responseJSON];
 		
-		//NSArray *keys = [NSArray arrayWithObjects:@"access_token", @"expires_in", @"refresh_token", @"scope", nil];
 		for (NSString *k in oAuthKeys) {
 			[_tokens setObject:[data objectForKey:k] forKey:k];
 		}
@@ -182,8 +172,6 @@
 		NSLog(@"Tokens: %@", _tokens);
 		
 		// Store them in the Keychain
-//		[_keychainWrapper setObject:[self clientId] forKey:(__bridge id)kSecAttrAccount];
-//		[_keychainWrapper setObject:_tokens forKey:(__bridge id)kSecValueData];
 		[self storeOAuthTokenInKeychain];
 		
 		// Complete the callback from earlier
@@ -219,7 +207,7 @@
 	}
 	
 	// Clear the Keychain
-	[_keychainWrapper resetKeychainItem];
+	[self removeOAuthTokenFromKeychain];
 }
 
 #pragma mark - OAuth Access Token store/retrieve, borrowed from https://github.com/rsieiro/RSOAuthEngine

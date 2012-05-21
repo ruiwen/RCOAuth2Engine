@@ -6,7 +6,6 @@
 //
 
 #import "MKNetworkEngine.h"
-#import "KeychainItemWrapper.h"
 
 typedef enum _RCOAuth2GrantType 
 {
@@ -30,7 +29,6 @@ typedef void (^RCOAuth2CompletionBlock)(NSError *error);
 	RCOAuth2CompletionBlock _oAuthCompletionBlock;
 	
 	@private
-	KeychainItemWrapper *_keychainWrapper;
 	NSMutableDictionary *_tokens;
 	NSString *_hostname;
 	NSString *_authPath;
