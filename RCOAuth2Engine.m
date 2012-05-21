@@ -75,6 +75,7 @@
 	if (self) {
 
 		NSLog(@"Begin init setup");
+		_oAuthInProgress = NO;
 		_tokens = [[NSMutableDictionary alloc] init];
 
 		[self setClientId:clientId];
@@ -174,15 +175,22 @@
 		// Store them in the Keychain
 		[self storeOAuthTokenInKeychain];
 		
-		// Set the headers
-
 		// Complete the callback from earlier
 		if (_oAuthCompletionBlock) {
+			// We're done!
+			_oAuthInProgress = NO;
+			
 			NSLog(@"Sending..");
-			_oAuthCompletionBlock(nil);
+			if(_oAuthCompletionBlock) {
+				_oAuthCompletionBlock(nil);
+			}
+			_oAuthCompletionBlock = nil;
 		}
 		
 	} onError:^(NSError *error) {
+		// We're done!
+		_oAuthInProgress = NO;
+
 		NSLog(@"Step Two Error");
 	}];
 	
@@ -223,7 +231,34 @@
 	}
 
 }
-	 
+
+- (void)enqueueOperation:(MKNetworkOperation *)request {
+	
+	// If we're not authenticated, and this is not part of the OAuth process,
+	if (!self.isAuthenticated && !_oAuthInProgress) {
+		_oAuthInProgress = YES;
+		[self authenticateWithCompletionBlock:^(NSError *error) {
+			if(error) {
+				// Auth failed, return the error
+				NSLog(@"Auth error: %@", error);
+			}
+			else {
+				// Auth succeeded, call this method again
+				[self prepareHeaders:request]; // Set the newly acquired OAuth2 Authorization
+				[super enqueueOperation:request];
+			}
+			
+			_oAuthInProgress = NO;
+		}];
+		
+		// This method will be called again when auth completes
+		return;
+	}
+
+	[super enqueueOperation:request];
+	
+}
+
 #pragma mark - OAuth Access Token store/retrieve, borrowed from https://github.com/rsieiro/RSOAuthEngine
 
 - (void)removeOAuthTokenFromKeychain

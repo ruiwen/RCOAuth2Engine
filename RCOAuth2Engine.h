@@ -29,6 +29,7 @@ typedef void (^RCOAuth2CompletionBlock)(NSError *error);
 	RCOAuth2CompletionBlock _oAuthCompletionBlock;
 	
 	@private
+	BOOL	_oAuthInProgress;
 	NSMutableDictionary *_tokens;
 	NSString *_hostname;
 	NSString *_authPath;
