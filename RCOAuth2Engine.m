@@ -200,13 +200,23 @@
 - (void)parseOAuth2Query:(NSURL *)url {
 	NSArray *query = [url.query componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"&="]];
 	
-	NSLog(@"Query: %@", query);
+	// Split it into a dictionary for easy querying
+	NSMutableDictionary *queryParams = [[NSMutableDictionary alloc] init];
+	for(int i = 0; i < [query count]; i+= 2) { // Step 2 items for each iteration
+		[queryParams setObject:[query objectAtIndex:i+1] forKey:[query objectAtIndex:i]];
+	}
 	
-	// Extract the code from the return URL
-	NSString *code = [query objectAtIndex:[query indexOfObject:@"code"]+1];	
-	NSLog(@"Code: %@", code);
+	if([queryParams objectForKey:@"code"]) {
+		[self completeOAuthWithCode:[queryParams objectForKey:@"code"]];
+	}
 	
-	[self completeOAuthWithCode:code];
+	if([queryParams objectForKey:@"error"]) {
+		NSError *error = [[NSError alloc] initWithDomain:[self hostname] code:403 userInfo:queryParams];
+		if(_oAuthCompletionBlock) {
+			_oAuthCompletionBlock(error);
+		}
+		_oAuthCompletionBlock = nil;
+	}
 }
 	 
 
