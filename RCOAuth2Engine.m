@@ -75,7 +75,7 @@
 	if (self) {
 
 		NSLog(@"Begin init setup");
-		_oAuthInProgress = NO;
+		//_oAuthInProgress = NO;
 		_tokens = [[NSMutableDictionary alloc] init];
 
 		[self setClientId:clientId];
@@ -87,7 +87,6 @@
 		_redirect = redirect;
 		
 		// Retrieve tokens from Keychain if possible
-		NSLog(@"Retrieving");
 		[self retrieveOAuthTokenFromKeychain];
 		
 		NSLog(@"Init tokens: %@", _tokens);
@@ -98,8 +97,6 @@
 }
 
 - (BOOL)isAuthenticated {
-	NSLog(@"isAuthenticated");
-	NSLog(@"%@", _tokens);
 	return [_tokens objectForKey:@"access_token"] != nil;
 }
 
@@ -178,7 +175,7 @@
 		// Complete the callback from earlier
 		if (_oAuthCompletionBlock) {
 			// We're done!
-			_oAuthInProgress = NO;
+			//_oAuthInProgress = NO;
 			
 			NSLog(@"Sending..");
 			if(_oAuthCompletionBlock) {
@@ -189,7 +186,7 @@
 		
 	} onError:^(NSError *error) {
 		// We're done!
-		_oAuthInProgress = NO;
+		//_oAuthInProgress = NO;
 
 		NSLog(@"Step Two Error");
 	}];
@@ -230,23 +227,12 @@
 	[self removeOAuthTokenFromKeychain];
 }
 
-- (void)prepareHeaders:(MKNetworkOperation *)operation {
-	[super prepareHeaders:operation];
-	
-	// Add more headers
-	// Authorization: OAuth2 access_token=adfadfad
-	if([_tokens objectForKey:@"access_token"]) { 
-		NSString *authHeader = [NSString stringWithFormat:@"access_token=%@", [_tokens objectForKey:@"access_token"]];
-		[operation setAuthorizationHeaderValue:authHeader forAuthType:@"OAuth2"];
-	}
 
-}
-
-- (void)enqueueOperation:(MKNetworkOperation *)request {
-	
+- (void)enqueueSignedOperation:(MKNetworkOperation *)request{
+	DLog(@"enqueueOperation:withAuth");
 	// If we're not authenticated, and this is not part of the OAuth process,
-	if (!self.isAuthenticated && !_oAuthInProgress) {
-		_oAuthInProgress = YES;
+	if (!self.isAuthenticated) {
+		DLog(@"enqueueSignedOperation - Not authenticated");
 		[self authenticateWithCompletionBlock:^(NSError *error) {
 			if(error) {
 				// Auth failed, return the error
@@ -254,19 +240,25 @@
 			}
 			else {
 				// Auth succeeded, call this method again
-				[self prepareHeaders:request]; // Set the newly acquired OAuth2 Authorization
-				[super enqueueOperation:request];
+				//[self prepareHeaders:request]; // Set the newly acquired OAuth2 Authorization
+				[self enqueueSignedOperation:request];
 			}
-			
-			_oAuthInProgress = NO;
 		}];
 		
 		// This method will be called again when auth completes
-		return;
+		//return;
 	}
-
-	[super enqueueOperation:request];
-	
+	else {
+		DLog(@"enqueueSignedOperation - Authenticated");
+		// Add more headers
+		// Authorization: OAuth2 access_token=adfadfad
+		if([_tokens objectForKey:@"access_token"]) { 
+			NSString *authHeader = [NSString stringWithFormat:@"access_token=%@", [_tokens objectForKey:@"access_token"]];
+			[request setAuthorizationHeaderValue:authHeader forAuthType:@"OAuth2"];
+		}
+		
+		[self enqueueOperation:request];
+	}
 }
 
 #pragma mark - OAuth Access Token store/retrieve, borrowed from https://github.com/rsieiro/RSOAuthEngine

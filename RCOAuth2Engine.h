@@ -29,7 +29,7 @@ typedef void (^RCOAuth2CompletionBlock)(NSError *error);
 	RCOAuth2CompletionBlock _oAuthCompletionBlock;
 	
 	@private
-	BOOL	_oAuthInProgress;
+	//BOOL	_oAuthInProgress;
 	NSMutableDictionary *_tokens;
 	NSString *_hostname;
 	NSString *_authPath;
@@ -54,6 +54,7 @@ typedef void (^RCOAuth2CompletionBlock)(NSError *error);
 - (void)completeOAuthWithCode:(NSString *)code;
 - (void)parseOAuth2Query:(NSURL *)url;
 - (void)resetAuth;
+- (void)enqueueSignedOperation:(MKNetworkOperation *)request;
 
 @end
 
