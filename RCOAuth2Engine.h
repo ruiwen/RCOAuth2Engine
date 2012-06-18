@@ -7,20 +7,6 @@
 
 #import "MKNetworkEngine.h"
 
-typedef enum _RCOAuth2GrantType 
-{
-	none,
-	authorization_code,
-	
-} RCOAuth2GrantType;
-
-typedef enum _RCOAuth2Responsetype 
-{
-	token,
-	code,
-	
-} RCOAuth2ResponseType;
-
 
 typedef void (^RCOAuth2CompletionBlock)(NSError *error);
 
@@ -29,7 +15,6 @@ typedef void (^RCOAuth2CompletionBlock)(NSError *error);
 	RCOAuth2CompletionBlock _oAuthCompletionBlock;
 	
 	@private
-	//BOOL	_oAuthInProgress;
 	NSMutableDictionary *_tokens;
 	NSString *_hostname;
 	NSString *_authPath;

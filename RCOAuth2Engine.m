@@ -174,8 +174,6 @@
 		
 		// Complete the callback from earlier
 		if (_oAuthCompletionBlock) {
-			// We're done!
-			//_oAuthInProgress = NO;
 			
 			NSLog(@"Sending..");
 			if(_oAuthCompletionBlock) {
@@ -185,9 +183,6 @@
 		}
 		
 	} onError:^(NSError *error) {
-		// We're done!
-		//_oAuthInProgress = NO;
-
 		NSLog(@"Step Two Error");
 	}];
 	
