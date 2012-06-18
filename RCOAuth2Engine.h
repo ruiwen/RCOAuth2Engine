@@ -12,8 +12,6 @@ typedef void (^RCOAuth2CompletionBlock)(NSError *error);
 
 @interface RCOAuth2Engine : MKNetworkEngine
 {
-	RCOAuth2CompletionBlock _oAuthCompletionBlock;
-	
 	@private
 	NSMutableDictionary *_tokens;
 	NSString *_hostname;
@@ -21,7 +19,7 @@ typedef void (^RCOAuth2CompletionBlock)(NSError *error);
 	NSString *_tokenPath;
 	NSString *_redirect;
 }
-
+@property (copy) RCOAuth2CompletionBlock oAuthCompletionBlock;
 @property (readonly) NSString *clientId;
 @property (readonly) NSString *clientSecret;
 

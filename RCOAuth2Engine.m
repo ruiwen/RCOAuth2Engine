@@ -22,6 +22,8 @@
 
 @implementation RCOAuth2Engine
 
+@synthesize oAuthCompletionBlock = _oAuthCompletionBlock;
+
 - (NSString *)hostname {
 	return (_hostname) ? _hostname : @"";
 }
@@ -75,7 +77,7 @@
 	if (self) {
 
 		NSLog(@"Begin init setup");
-		//_oAuthInProgress = NO;
+		self.oAuthCompletionBlock = nil;
 		_tokens = [[NSMutableDictionary alloc] init];
 
 		[self setClientId:clientId];
@@ -104,7 +106,7 @@
 - (void)authenticateWithCompletionBlock:(RCOAuth2CompletionBlock)completionBlock {
 
 	// Store the Completion Block to call after authentication
-	_oAuthCompletionBlock = completionBlock;
+	self.oAuthCompletionBlock = completionBlock;
 	
 	// Begin OAuth2 
 	NSLog(@"Begin the OAuth!");
@@ -173,13 +175,9 @@
 		[self storeOAuthTokenInKeychain];
 		
 		// Complete the callback from earlier
-		if (_oAuthCompletionBlock) {
-			
-			NSLog(@"Sending..");
-			if(_oAuthCompletionBlock) {
-				_oAuthCompletionBlock(nil);
-			}
-			_oAuthCompletionBlock = nil;
+		if (self.oAuthCompletionBlock) {
+			self.oAuthCompletionBlock(nil);
+			self.oAuthCompletionBlock = nil;
 		}
 		
 	} onError:^(NSError *error) {
