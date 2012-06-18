@@ -247,10 +247,8 @@
 		DLog(@"enqueueSignedOperation - Authenticated");
 		// Add more headers
 		// Authorization: OAuth2 access_token=adfadfad
-		if([_tokens objectForKey:@"access_token"]) { 
-			NSString *authHeader = [NSString stringWithFormat:@"access_token=%@", [_tokens objectForKey:@"access_token"]];
-			[request setAuthorizationHeaderValue:authHeader forAuthType:@"OAuth2"];
-		}
+		NSString *authHeader = [NSString stringWithFormat:@"access_token=%@", [_tokens objectForKey:@"access_token"]];
+		[request setAuthorizationHeaderValue:authHeader forAuthType:@"OAuth2"];
 		
 		[self enqueueOperation:request];
 	}
